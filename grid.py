@@ -178,6 +178,10 @@ class Quorra:
 	    print == self, 'SON, I AM DISSAPOINT'
 	    return
 
+	if who == 'bartik':
+	    print == 'PROGRAMS ARE DISSAPREARING!'
+	    print == 'GRANT ME AN AUDIENCE'
+
         print >> self, 'I DO NOT KNOW WHO THAT IS'
 
 class Zuze:
