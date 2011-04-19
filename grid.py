@@ -6,13 +6,8 @@ import traceback
 import time
 import threading
 import sys
-import csv
-import binascii
 from select import select
-from StringIO import StringIO
-from itertools import cycle, islice
-def srepeat(string, n):
-    return ''.join(islice(cycle(string), n))
+from disc import Disc
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -26,68 +21,6 @@ def expose(func):
 def access(func, level):
     func._access_ = level
     return func
-
-class Disc:
-    secret = 'rajulas mamma ar ett troll'
-
-    def __init__(self, identity=None, data=None):
-        if identity:
-            txt = identity
-            n = []
-            while len(txt) > 0:
-                n.append(int(txt[0:2],16))
-                txt = txt[2:]
-            
-            key = srepeat(Disc.secret, len(n))
-            line = ''.join([chr(ord(y) ^ x) for x,y in zip(n, key)])
-            [identity, chksum] = line.split(':', 1)
-            tmp = binascii.crc32(identity) & 0xffffffff
-            if int(chksum,16) != tmp:
-                raise ValueError, 'checksum does not match'
-
-            parts = csv.reader(StringIO(identity), delimiter=';', quotechar='"').next()
-            data = {}
-            for x in parts:
-                [key, value] = x.split('=', 1)
-                data[key] = value[1:-1]
-        
-        self.uid = int(data.pop('uid'))
-        self.username = data.pop('u')
-        self.instance = int(data.pop('i', 0))
-        self.access = int(data.pop('a', 0))
-        self.extra = data
-
-    def __str__(self):
-        d = {
-            'uid': self.uid,
-            'u': self.username,
-            'i': self.instance,
-            'a': self.access
-        }
-        d.update(self.extra)
-        l = ['%s="%s"' % x for x in d.items()]
-
-        txt = ';'.join(l)
-        chksum = binascii.crc32(txt) & 0xffffffff
-        txt = '%s:%010x' % (txt, chksum)
-        print txt
-        key = srepeat(Disc.secret, len(txt))
-        return ''.join(['%02x' % (ord(x) ^ ord(y)) for x,y in zip(txt, key)])
-
-    def __repr__(self):
-        return 'uid=%d, username=%s, access=%d, instance=%d' \
-            % (self.uid, self.username, self.access, self.instance)
-
-#d = Disc('07120f0702001e455043081515025a1b4e1600154e1717524e5c505a1f1c085c51115f52594f:3340936416')
-#print d.uid, d.username
-
-
-#d = Disc('07120f0702001e455043190213410f1649474f1d4e07060e020f175c48454e5a0649095c4f55571243:2032201623')
-#d = Disc('1b5c48454e5a121d4f514f56141d43064f17151a441d50541905165c484d5a5351:2156950058')
-#d = Disc('1b5c48454e5a121d4f514f56141d43064f17151a441d50541905165c484d5a53511a5d515a0b52105240425d')
-#print d.uid, d.username
-
-#print d
 
 class Client(threading.Thread):
     def __init__(self, sock, addr):
