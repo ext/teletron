@@ -43,6 +43,10 @@ Usage: CODE <NUMBER> [ARGS..]"""
             print >> self, 'GOT ANSWER TO THE ULTIMATE QUESTION OF LIFE, THE UNIVERSE, AND EVERYTHING. QUESTION FORGOTTEN.'
             return
 
+	if num == 666
+	    print >> self, "DO NOT AWAKEN THE EVIL THAT IS INSIDE YOU"
+	    return
+
         if num == 1337:
             print >> self, 'ARE YOU A WIZARD?'
             return
