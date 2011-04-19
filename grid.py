@@ -403,7 +403,7 @@ class Tron:
             print >> self, "IT'S NOT VERY EFFECTIVE..."
                 
 class Client(threading.Thread):
-    programs = [Clu, Rinzler, MCP, Quorra, Zuze, Tron]
+    programs = [Clu, Rinzler, MCP, Quorra, Zuse, Tron]
     files = {
         'GARBAGE': 'herp derp the final password, lol',
         'nxgame': '''<insert text here>'''
@@ -593,6 +593,8 @@ class Client(threading.Thread):
                     for x in lyrics:
                         time.sleep(2)
                         for y in x:
+                            if not self.alive:
+                                return
                             self.sock.send(y)
                             time.sleep(0.1)
                         self.sock.send("\r\n")
