@@ -41,13 +41,13 @@ def shift(*text):
 
 class Clu:
     access = 0
-    alias = ['clu']
+    alias = ['clu','clu program']
     location = ['vault', 'end of line bar', 'grid']
 
     @expose
     def code(self, num, *args):
         """Modify memory on your disc
-Usage: CODE <NUMBER> [ARGS..]"""
+Usage: CODE <NUMBER> [ARGUMENTS..]"""
 
         try:
             num = int(num)
@@ -175,6 +175,8 @@ Usage: CODE <NUMBER> [ARGS..]"""
             return
         self.disc.access = 11
         self.disc.commit(self.conn, self)
+	self.blacklist.append(Clu.alias[0])
+
         print >> self, 'PASSW#¤%TKGÄLĸjłħ¢÷'
         print >> self, 'ABORTED'
         print >> self, 'ILLEGAL CODE DETECTED'
@@ -230,7 +232,7 @@ class MCP:
 
 class Rinzler:
     access = 1
-    alias = ['rinzler', 'r']
+    alias = ['rinzler', 'r', 'rinzler program']
 
     @expose
     def initiate(self, *args):
@@ -256,7 +258,7 @@ class Rinzler:
 
 class Quorra:
     access = 2
-    alias = ['quorra', 'q']
+    alias = ['quorra', 'q', 'quorra program']
 
     @expose
     @shift('to')
@@ -316,7 +318,7 @@ class Quorra:
 
 class Zuse:
     access = 3
-    alias = ['zuse', 'z']
+    alias = ['zuse', 'z', 'zuse program']
     stock_ = {
         'acl inject': 10000,
         'wirts leg': 14000,
@@ -355,7 +357,7 @@ class Zuse:
 
 class Tron:
     access = 4
-    alias = ['tron']
+    alias = ['tron', 'tron program']
 
     @expose
     @shift('program', 'from', 'slot')
@@ -366,7 +368,7 @@ class Tron:
             if acl == 0:
                 print >> self, 'NOTHING IN SLOT 0'
             elif acl == 1:
-                print >> self, 'PROGRAM ACL INJECT INSTALLED'
+                print >> self, 'COMMAND INJECT INSTALLED'
                 self.disc.extra['acl inject'] = 2
                 self.disc.commit(self.conn, self)
             else:
