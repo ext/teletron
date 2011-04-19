@@ -160,7 +160,24 @@ class Quorra:
             print >> self, 'RUN CODE 149 TO PROCEED'
             print >> self, 'FIND DOCUMENTATION AT <insert rajula here>'
             return
-        
+
+        if who == 'gem':
+	    print >> self, 'YOU ARE LOOKING FOR SOMEONE'
+	    print >> self, 'FOLLOW ME' 
+	    return
+
+	if who == 'rinzler':
+	    print >> self, 'I TOOK PART IN FOOLING YOU'
+	    return
+
+	if who == 'clu':
+	    print >> self, 'WHAT ARE YOU, STUPID?'
+	    return
+
+	if who == 'quorra':
+	    print == self, 'SON, I AM DISSAPOINT'
+	    return
+
         print >> self, 'I DO NOT KNOW WHO THAT IS'
 
 class Zuze:
