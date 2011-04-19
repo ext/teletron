@@ -164,6 +164,8 @@ class Client(threading.Thread):
         try:
             self.disc = Disc(self.conn, identity)
             print >> self, 'WELCOME', self.disc.username
+            if 'god' in self.disc.extra:
+                print >> self, 'G-G-G-OD MODE ENABLED'
         except ValueError, e:
             print '[%s] --- %s' % (self.addr, str(e))
             print >> self, 'CORRUPT DISC'
@@ -225,10 +227,22 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
                 
                 print >> self, 'ACCESS GRANTED. %s PROGRAM ACTIVATED' % x.alias[0].upper()
                 self.program = x
+
+                if self.disc.access == 0:
+                    print >> self, 'PASSWORD: kycklingcurry'
+
                 return
         else:
             print >> self, 'UNKNOWN PROGRAM'
-        
+
+    @expose
+    def whosyourdaddy(self):
+        if self.disc.uid > 100:
+            self.disc.corrupt = 1
+        else:
+            self.disc.extra['god'] = 1            
+        self.disc.commit(self.conn, self)
+
     @expose
     def _generate_identity_(self, uid, username):
         try:
@@ -269,9 +283,6 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
                     print >> sys.stderr, '[%s] client disconnected' % str(self.addr)
                     self.stop()
                     continue
-
-                for x in line:
-                    print ord(x)
 
                 line = line.strip()
                 print '[%s] <<< %s' % (self.addr, line)

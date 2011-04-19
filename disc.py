@@ -61,7 +61,10 @@ class Disc:
         conn.commit()
 
         if self.corrupt == 1:
-            print >> dst, 'DISC CORRUPT'
+            if 'god' not in self.extra:
+                print >> dst, 'DISC CORRUPT'
+            else:
+                print >> dst, 'GOD MODE PREVENTED DISC CORRUPTION'
         else:
             print >> dst, 'YOUR DISC HAS BEEN UPDATED'
             print >> dst, 'NEW DISC:', str(self)
