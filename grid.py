@@ -31,7 +31,6 @@ class Clu:
     def code(self, num, *args):
         """Modify memory on your disc
 Usage: CODE <NUMBER> [ARGS..]"""
-        print 'code', num, args
 
         try:
             num = int(num)
@@ -48,47 +47,67 @@ Usage: CODE <NUMBER> [ARGS..]"""
             print >> self, 'ARE YOU A WIZARD?'
             return
 
+        if num > 9000:
+            print >> self, "IT'S OVER NINE-THOUSAND!"
+            return
+
         # riktiga
         if num == 6:
-            if len(args) != 4:
-                print >> self, 'NO LOCATION SPECIFIED'
-                return
+            self.code_6(args)
 
-            if args[0].lower() != 'password':
-                print >> self, 'MALFORMED COMMAND'
-                print 'pwd'
-                return
+        if num == 872:
+            self.code_872(args)
 
-            if args[1].lower() != 'to':
-                print >> self, 'MALFORMED COMMAND'
-                print 'to'
-                return
+    def code_6(self, args):
+        if len(args) != 4:
+            print >> self, 'NO LOCATION SPECIFIED'
+            return
+        
+        if args[0].lower() != 'password':
+            print >> self, 'MALFORMED COMMAND'
+            print 'pwd'
+            return
 
-            if args[2].lower() != 'memory':
-                print >> self, 'MALFORMED COMMAND'
-                print 'mem'
-                return
+        if args[1].lower() != 'to':
+            print >> self, 'MALFORMED COMMAND'
+            print 'to'
+            return
 
-            try:
-                loc = args[3]
-                print 'loc', loc
-                if loc == '0222':
-                    tmp = self.disc.access
-                    self.disc.access = 1
-                    self.disc.commit(self.conn, self)
-                    if tmp == 0:
-                        print >> self, 'PASSWORD: tonfiskchili19'
+        if args[2].lower() != 'memory':
+            print >> self, 'MALFORMED COMMAND'
+            print 'mem'
+            return
+
+        try:
+            loc = args[3]
+            print 'loc', loc
+            if loc == '0222':
+                tmp = self.disc.access
+                self.disc.access = 1
+                self.disc.commit(self.conn, self)
+                if tmp == 0:
+                    print >> self, 'PASSWORD: tonfiskchili19'
                     return
-                elif int(loc) % 5 == 0 or int(loc) % 13 == 0 or int(loc) % 42 == 0:
-                    self.disc.corrupt = 1
-                    self.disc.commit(self.conn, self)
-                    return
-                else:
-                    print >> self, 'INVALID LOCATION'
-                    return
-            except:
-                traceback.print_exc()
-                print >> self, 'MALFORMED COMMAND'
+            elif int(loc) % 5 == 0 or int(loc) % 13 == 0 or int(loc) % 42 == 0:
+                self.disc.corrupt = 1
+                self.disc.commit(self.conn, self)
+                return
+            else:
+                print >> self, 'INVALID LOCATION'
+                return
+        except:
+            traceback.print_exc()
+            print >> self, 'MALFORMED COMMAND'
+
+    def code_872(self, args):
+        line = ' '.join(args).lower()
+        if line != 'override port control':
+            print >> self, 'MALFORMED COMMAND'
+        if self.disc.attack != 1:
+            print >> self, 'NOT IN ATTACK MODE, USE RINZLER TO ENGAGE'
+        self.disc.access = 2
+        self.disc.commit(self.conn, self)
+        print >> self, 'PASSWORD: sottjej17'
 
 class MCP:
     access = 10
@@ -117,10 +136,15 @@ class Rinzler:
             print >> self, "IT'S SUPER EFFECTIVE"
             self.blacklist.append(program.alias[0])
         else:
+            self.disc.attack = 1
             print >> self, 'RUN CODE 872 TO PROCEED'
 
+class Quorra:
+    access = 2
+    alias = ['quorra', 'q']
+
 class Client(threading.Thread):
-    programs = [Clu, Rinzler]
+    programs = [Clu, Rinzler, MCP, Quorra]
     files = {
         'GARBAGE': 'troll',
         'nxgame': '''<insert text here>'''
@@ -272,6 +296,13 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
                 print >> self, 'PASSWORD: kycklingcurry'            
 
     @expose
+    def exit(self):
+        if self.program:
+            self.program = None
+        else:
+            self.stop()
+
+    @expose
     def whosyourdaddy(self):
         if self.disc.uid > 100:
             self.disc.corrupt = 1
@@ -305,7 +336,10 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
         while self.alive:
             try:
                 if need_prompt:
-                    sock.send('> ')
+                    if self.program:
+                        sock.send('%s > ' % self.program.alias[0])
+                    else:
+                        sock.send('> ')
                     need_prompt = False
 
                 rd, rw, rx = select([sock], [], [sock], 1.0)
@@ -321,8 +355,8 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
                 line = sock.recv(4096)
                 
                 if line in [chr(3), chr(4), chr(255) + chr(244) + chr(255) + chr(253) + chr(6)]:
-                    print >> sys.stderr, '[%s] client disconnected' % str(self.addr)
-                    self.stop()
+                    sock.send("\r\n")
+                    self.exit()
                     continue
 
                 line = line.strip()
@@ -332,7 +366,7 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
                 cmd = line[0].lower()
                 args = line[1:]
 
-                if self.disc == None and cmd not in ['login', '_generate_identity_']:
+                if self.disc == None and cmd not in ['exit', 'login', '_generate_identity_']:
                     print >> self, 'INSERT DISC'
                     continue
 
