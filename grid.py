@@ -226,7 +226,12 @@ class MCP:
 
     @expose
     def pwdgen(self, *key):
-        print >> self, MCP.gen(self, ' '.join(key).upper())
+        pwd = MCP.gen(self, ' '.join(key).upper())
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(('localhost', 4851))
+        s.send('%s: %s' % (self.disc.username, pwd))
+        s.close()
+        print >> self, 'PASSWORD OUTPUTTED'
 
 class Rinzler:
     access = 1
