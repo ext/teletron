@@ -506,9 +506,9 @@ class Client(threading.Thread):
             if x not in Client.files:
                 print >> self, 'NO SUCH FILE:', x
                 return
-            #if x == 'GARBAGE' and self.disc.access < 12:
-            #    print >> self, 'ACCESS RESTRICTED:', x
-            #    return
+            if x == 'GARBAGE' and self.disc.access < 12:
+                print >> self, 'ACCESS RESTRICTED:', x
+                return
             
             print >> self, Client.files[x]
 
