@@ -13,7 +13,7 @@ from disc import Disc
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-s.bind(('', 1337))
+s.bind(('', 4711))
 s.listen(1)
 
 def expose(func):
@@ -34,20 +34,20 @@ def shift(*text):
         def inner(self, *args):
             for x,y in zip(args, text):
                 if x!=y:
-                    raise ValueError, 'got %s, expected %s' % (x,y)
+                    raise TypeError, 'got %s, expected %s' % (x,y)
             return func(self, args[n:])
         return inner
     return wrapper
 
 class Clu:
     access = 0
-    alias = ['clu']
+    alias = ['clu', 'clu program']
     location = ['vault', 'end of line bar', 'grid', 'west house']
 
     @expose
     def code(self, num, *args):
         """Modify memory on your disc
-Usage: CODE <NUMBER> [ARGS..]"""
+Usage: CODE <NUMBER> [ARGUMENTS..]"""
 
         try:
             num = int(num)
@@ -175,6 +175,8 @@ Usage: CODE <NUMBER> [ARGS..]"""
             return
         self.disc.access = 11
         self.disc.commit(self.conn, self)
+	self.blacklist.append(Clu.alias[0])
+
         print >> self, 'PASSW#¤%TKGÄLĸjłħ¢÷'
         print >> self, 'ABORTED'
         print >> self, 'ILLEGAL CODE DETECTED'
@@ -235,14 +237,16 @@ class MCP:
 
 class Rinzler:
     access = 1
-    alias = ['rinzler', 'r']
+    alias = ['rinzler', 'r', 'rinzler program']
 
     @expose
     def initiate(self, *args):
+        """DOCUMENTATION MISSING
+        PLEASE TRY: http://thegame.nx/trafficing2.png """ 
         if len(args) < 3 or \
                 args[0].lower() != 'attack' or \
                 args[1].lower() != 'on':
-            raise ValueError
+            raise TypeError
 
         target = ' '.join(args[2:]).lower()
         program = self.resolve_program(target)
@@ -258,15 +262,18 @@ class Rinzler:
         else:
             self.disc.attack = 1
             print >> self, 'RUN CODE 872 TO PROCEED'
+            print >> self, 'DOCUMENTATION CAN BE FOUND AT: http://thegame.nx/higher.jpg'
 
 class Quorra:
     access = 2
-    alias = ['quorra', 'q']
+    alias = ['quorra', 'q', 'quorra program']
 
     @expose
     @shift('to')
     def introduce(self, who):
-        who = who.lower()
+        """DOCUMENTATION MISSING
+PLEASE TRY: http://thegame.nx/joxx.png """ 
+	who = ' '.join(who).lower()
         if who == 'castor':
             print >> self, 'THIS IS NOT HIS REAL NAME'
             return
@@ -275,6 +282,7 @@ class Quorra:
             print >> self, 'YOU HAVE BEEN INTRODUCED TO ZUSE'
             print >> self, 'YOU CAN FIND ZUSE AT THE END OF LINE BAR'
             print >> self, 'RUN CODE 149 TO PROCEED'
+            print >> self, 'DOCUMENTATION CAN BE FOUND AT: http://thegame.nx/directions.jpg'
             print >> self, 'FIND DOCUMENTATION AT <insert rajula here>'
             self.disc.access = 3
             return
@@ -321,11 +329,11 @@ class Quorra:
 
 class Zuse:
     access = 3
-    alias = ['zuse', 'z']
+    alias = ['zuse', 'z', 'zuse program']
     stock_ = {
         'acl inject': 10000,
         'wirts leg': 14000,
-        'bablefish': 8000,
+        'babelfish': 8000,
     }
 
     @expose
@@ -360,7 +368,7 @@ class Zuse:
 
 class Tron:
     access = 4
-    alias = ['tron']
+    alias = ['tron', 'tron program']
 
     @expose
     @shift('program', 'from', 'slot')
@@ -371,7 +379,7 @@ class Tron:
             if acl == 0:
                 print >> self, 'NOTHING IN SLOT 0'
             elif acl == 1:
-                print >> self, 'PROGRAM ACL INJECT INSTALLED'
+                print >> self, 'COMMAND INJECT INSTALLED'
                 self.disc.extra['acl inject'] = 2
                 self.disc.commit(self.conn, self)
             else:
@@ -403,7 +411,7 @@ class Tron:
             self.disc.access = 10
             self.disc.commit(self.conn, self)
             print >> self, 'RUN CODE 429 TO PROCEED'
-            print >> self, '<inject trollolol here>'
+            print >> self, 'DOCUMENTATION CAN BE FOUND AT: http://thegame.nx/4711.jpg'
         else:
             print >> self, "IT'S NOT VERY EFFECTIVE..."
                 
