@@ -93,6 +93,10 @@ class Rinzler:
 
 class Client(threading.Thread):
     programs = [Clu, Rinzler]
+    files = {
+        'GARBAGE': 'troll',
+        'nxgame': '''<insert text here>'''
+    }
 
     def __init__(self, sock, addr):
         threading.Thread.__init__(self)
@@ -165,6 +169,27 @@ class Client(threading.Thread):
             print >> self, 'CORRUPT DISC'
 
     @expose
+    def ls(self):
+        for x in Client.files.keys():
+            print >> self, x
+
+    @expose
+    def cat(self, *args):
+        self.show(*args)
+
+    @expose
+    def show(self, *args):
+        for x in args:
+            if x not in Client.files:
+                print >> self, 'NO SUCH FILE:', x
+                return
+            if x == 'GARBAGE' and self.disc.access < 10:
+                print >> self, 'ACCESS RESTRICTED:', x
+                return
+            
+            print >> self, Client.files[x]
+
+    @expose
     def logout(self):
         """Logout from the grid"""
         self.stop()
@@ -223,12 +248,18 @@ class Client(threading.Thread):
         print >> self, 'WELCOME TO THE NX GRID'
         print >> self, 'INSERT DISC'
 
+        hack = True
         while self.alive:
             try:
+                if hack:
+                    sock.send('> ')
+                    hack = False
+
                 rd, rw, rx = select([sock], [], [], 1.0)
                 if len(rd) == 0:
                     continue
 
+                hack = True
                 line = sock.recv(4096).strip()
                 print '[%s] <<< %s' % (self.addr, line)
                 line = line.split(' ')
