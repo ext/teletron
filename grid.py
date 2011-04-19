@@ -234,6 +234,8 @@ class Rinzler:
 
     @expose
     def initiate(self, *args):
+        """DOCUMENTATION MISSING
+        PLEASE TRY: http://thegame.nx/trafficing2.png """ 
         if len(args) < 3 or \
                 args[0].lower() != 'attack' or \
                 args[1].lower() != 'on':
@@ -253,6 +255,7 @@ class Rinzler:
         else:
             self.disc.attack = 1
             print >> self, 'RUN CODE 872 TO PROCEED'
+            print >> self, 'DOCUMENTATION CAN BE FOUND AT: http://thegame.nx/higher.jpg'
 
 class Quorra:
     access = 2
@@ -261,6 +264,8 @@ class Quorra:
     @expose
     @shift('to')
     def introduce(self, who):
+        """DOCUMENTATION MISSING
+        PLEASE TRY: http://thegame.nx/joxx.png """ 
         who = who.lower()
         if who == 'castor':
             print >> self, 'THIS IS NOT HIS REAL NAME'
@@ -270,6 +275,7 @@ class Quorra:
             print >> self, 'YOU HAVE BEEN INTRODUCED TO ZUSE'
             print >> self, 'YOU CAN FIND ZUSE AT THE END OF LINE BAR'
             print >> self, 'RUN CODE 149 TO PROCEED'
+            print >> self, 'DOCUMENTATION CAN BE FOUND AT: http://thegame.nx/directions.jpg'
             print >> self, 'FIND DOCUMENTATION AT <insert rajula here>'
             self.disc.access = 3
             return
@@ -398,7 +404,7 @@ class Tron:
             self.disc.access = 10
             self.disc.commit(self.conn, self)
             print >> self, 'RUN CODE 429 TO PROCEED'
-            print >> self, '<inject trollolol here>'
+            print >> self, 'DOCUMENTATION CAN BE FOUND AT: http://thegame.nx/4711.jpg'
         else:
             print >> self, "IT'S NOT VERY EFFECTIVE..."
                 
