@@ -202,15 +202,16 @@ class Quorra:
     alias = ['quorra', 'q']
 
     @expose
+	 @shift('to')
     def introduce(self, who):
         who = who.lower()
         if who == 'castor':
             print >> self, 'THIS IS NOT HIS REAL NAME'
             return
 
-        if who == 'zuze':
-            print >> self, 'YOU HAVE BEEN INTRODUCED TO ZUZE'
-            print >> self, 'YOU CAN FIND ZUZE AT THE END OF LINE BAR'
+        if who == 'zuse':
+            print >> self, 'YOU HAVE BEEN INTRODUCED TO ZUSE'
+            print >> self, 'YOU CAN FIND ZUSE AT THE END OF LINE BAR'
             print >> self, 'RUN CODE 149 TO PROCEED'
             print >> self, 'FIND DOCUMENTATION AT <insert rajula here>'
             self.disc.access = 3
@@ -256,9 +257,9 @@ class Quorra:
 
         print >> self, 'I DO NOT KNOW WHO THAT IS'
 
-class Zuze:
+class Zuse:
     access = 3
-    alias = ['zuze', 'z']
+    alias = ['zuse', 'z']
     stock_ = {
         'acl inject': 10000,
         'wirts leg': 14000,
@@ -269,11 +270,11 @@ class Zuze:
     def buy(self, *what):
         what = ' '.join(what).lower()
         """Buy application"""
-        if not what in Zuze.stock_:
+        if not what in Zuse.stock_:
             print >> self, 'I DONT HAVE THAT IN STOCK'
             return
 
-        x = Zuze.stock_[what]
+        x = Zuse.stock_[what]
         if x > self.disc.extra.get('cash',0):
             print >> self, 'YOU CANNOT AFFORD THAT'
             return
@@ -292,11 +293,11 @@ class Zuze:
     @expose
     def stock(self):
         """Show stock"""
-        for name, price in Zuze.stock_.items():
+        for name, price in Zuse.stock_.items():
             print >> self, name, price
 
 class Client(threading.Thread):
-    programs = [Clu, Rinzler, MCP, Quorra, Zuze]
+    programs = [Clu, Rinzler, MCP, Quorra, Zuse]
     files = {
         'GARBAGE': 'troll',
         'nxgame': '''<insert text here>'''
@@ -448,7 +449,7 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
 
         if program is None:
             print >> self, 'UNKNOWN PROGRAM'
-        elif name.lower() == 'zuze' and not self.disc.extra.get('loc', 'grid') == 'end of line bar':
+        elif name.lower() == 'zuse' and not self.disc.extra.get('loc', 'grid') == 'end of line bar':
             print >> self, 'UNKNOWN PROGRAM'
         elif program == False:
             print >> self, 'ACCESS DENIED'
