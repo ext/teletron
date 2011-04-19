@@ -51,6 +51,9 @@ class Disc:
                 raise ValueError, 'disc is marked as corrupt in database'
 
     def commit(self, conn, dst):
+        if 'god' not in self.extra:
+            self.corrupt = 0
+
         conn.execute('UPDATE disc SET corrupt=1 WHERE user_id=?', (self.uid,))
         conn.execute('''
 		INSERT OR REPLACE INTO
@@ -82,10 +85,9 @@ class Disc:
         txt = ';'.join(l)
         chksum = binascii.crc32(txt) & 0xffffffff
         txt = '%s:%010x' % (txt, chksum)
-        print txt
         key = srepeat(Disc.secret, len(txt))
         return ''.join(['%02x' % (ord(x) ^ ord(y)) for x,y in zip(txt, key)])
 
     def __repr__(self):
-        return 'uid=%d, username=%s, access=%d, instance=%d' \
-            % (self.uid, self.username, self.access, self.instance)
+        return 'uid=%d, username=%s, access=%d, instance=%d, location=%s, extra=%s' \
+            % (self.uid, self.username, self.access, self.instance, self.extra.get('loc', 'grid'), str(self.extra))
