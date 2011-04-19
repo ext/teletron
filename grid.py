@@ -23,7 +23,18 @@ def access(func, level):
     func._access_ = level
     return func
 
+
+class Clu:
+    access = 0
+    alias = ['clu', 'test']
+
+    @expose
+    def code(self, num, *args):
+        print 'code', num, args
+
 class Client(threading.Thread):
+    programs = [Clu]
+
     def __init__(self, sock, addr):
         threading.Thread.__init__(self)
         self.sock = sock
@@ -31,6 +42,7 @@ class Client(threading.Thread):
         self.alive = True
         self.buf = ''
         self.disc = None
+        self.program = None
         print >> sys.stderr, 'New client connected'
 
     def kill(self):
@@ -88,6 +100,35 @@ class Client(threading.Thread):
         print >> self, repr(self.disc)
 
     @expose
+    def rq(self, *args):
+        self.request('access', 'to', *args)
+
+    @expose
+    def request(self, *args):
+        if len(args) < 3:
+            raise TypeError
+        if args[0].lower() != 'access' or args[1].lower() != 'to':
+            raise TypeError
+
+        program = ' '.join(args[2:]).lower()
+        for x in Client.programs:
+            for y in x.alias:
+                print y, program
+                if y != program:
+                    continue
+
+                if x.access > self.disc.access:
+                    print >> self, 'ACCESS DENIED'
+                    return
+                
+                print >> self, 'ACCESS GRANTED. %s PROGRAM ACTIVATED' % y.upper()
+                self.program = x
+                print >> self
+                return
+        else:
+            print >> self, 'UNKNOWN PROGRAM'
+        
+    @expose
     def _generate_identity_(self, uid, username):
         disc = Disc(self.conn, values={'uid': uid, 'u': username})
         row = self.conn.execute('SELECT MAX(instance) FROM disc WHERE user_id=?', (disc.uid,)).fetchone()
@@ -118,6 +159,10 @@ class Client(threading.Thread):
 
                 cmd = line[0].lower()
                 args = line[1:]
+
+                if self.disc == None and cmd != 'login':
+                    print >> self, 'INSERT DISC'
+                    continue
 
                 func = Client.__dict__.get(cmd, None)
                 if func is None or getattr(func, '_exposed_') == None:
