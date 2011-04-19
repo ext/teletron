@@ -175,12 +175,12 @@ class Quorra:
 	    return
 
 	if who == 'quorra':
-	    print == self, 'SON, I AM DISSAPOINT'
+	    print >> self, 'SON, I AM DISSAPOINT'
 	    return
 
 	if who == 'bartik':
-	    print == 'PROGRAMS ARE DISSAPREARING!'
-	    print == 'GRANT ME AN AUDIENCE'
+	    print >> self, 'PROGRAMS ARE DISSAPREARING!'
+	    print >> self, 'GRANT ME AN AUDIENCE'
 
         print >> self, 'I DO NOT KNOW WHO THAT IS'
 
