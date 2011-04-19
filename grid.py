@@ -295,8 +295,6 @@ class Zuze:
         for name, price in Zuze.stock_.items():
             print >> self, name, price
 
-            if line[-1] == "\n"
-
 class Client(threading.Thread):
     programs = [Clu, Rinzler, MCP, Quorra, Zuze]
     files = {
