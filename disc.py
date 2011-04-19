@@ -51,7 +51,7 @@ class Disc:
                 raise ValueError, 'disc is marked as corrupt in database'
 
     def commit(self, conn, dst):
-        if 'god' not in self.extra:
+        if 'god' in self.extra:
             self.corrupt = 0
 
         conn.execute('UPDATE disc SET corrupt=1 WHERE user_id=?', (self.uid,))
