@@ -414,7 +414,11 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
                     continue
 
                 need_prompt = True
-                line = sock.recv(4096)
+                line = ""
+                while len(line) ==0 or not line[-1] == "\n":
+                    line += sock.recv(4096)
+
+                line = line.strip()
                 
                 if line in [chr(3), chr(4), chr(255) + chr(244) + chr(255) + chr(253) + chr(6)]:
                     sock.send("\r\n")
