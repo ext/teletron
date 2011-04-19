@@ -7,6 +7,7 @@ import time
 import threading
 import sys
 import sqlite3
+import md5
 from select import select
 from disc import Disc
 
@@ -79,6 +80,12 @@ Usage: CODE <NUMBER> [ARGS..]"""
             if num == 149:
                 return Clu.code_149(self, *args)
 
+            if num == 429:
+                return Clu.code_429(self, *args)
+
+            if num == 624:
+                return Clu.code_624(self, *args)
+
             if num == 872:
                 return Clu.code_872(self, args)
 
@@ -149,8 +156,37 @@ Usage: CODE <NUMBER> [ARGS..]"""
             if name == 'vault':
                 print >> self, 'YOU ARE NOW IN THE VAULT'
                 print >> self, 'USE STARCRAFT TO AQUIRE RESOURCES'
+
+            if name == 'west house':
+                print >> self, 'YOU ARE STANDING IN AN OPEN FIELD WEST OF A WHITE HOUSE, WITH A BOARDED FRONT DOOR.'
+                print >> self, 'THERE IS A SMALL MAILBOX HERE.'
         else:
             print >> self, 'UNKNOWN LOCATION'
+
+    @staticmethod
+    @shift('grant', 'access', 'to')
+    def code_429(self, what):
+        if self.disc.access < 10:
+            print >> self, 'PERMISSION DENIED'
+
+        what = self.resolve_program(' '.join(what).lower(), perm=False)
+        if what != MCP:
+            print >> self, 'ALREADY HAVE ACCESS TO', what.alias[0].upper()
+            return
+        self.disc.access = 11
+        self.disc.commit(self.conn, self)
+        print >> self, 'PASSW#¤%TKGÄLĸjłħ¢÷'
+        print >> self, 'ABORTED'
+        print >> self, 'ILLEGAL CODE DETECTED'
+        print >> self, 'CLU PROGRAM DETACHED FROM SYSTEM'
+
+    @staticmethod
+    def code_624(self):
+        tmp = self.disc.access
+        self.disc.access = 4
+        self.disc.commit(self.conn, self)
+        if tmp == 3:
+            print >> self, 'PASSWORD: rabarberstek'
 
     @staticmethod
     def code_872(self, args):
@@ -168,8 +204,29 @@ Usage: CODE <NUMBER> [ARGS..]"""
         print >> self, 'PASSWORD: sottjej17'
 
 class MCP:
-    access = 10
+    access = 11
     alias = ['master control program', 'master control', 'mcp']
+
+    @staticmethod
+    def gen(self, txt):
+        return md5.new(str(self.disc.uid) + txt).hexdigest()[:8]
+
+    @expose
+    def shutdown(self, key):
+        """Terminate MCP"""
+        if key != MCP.gen(self, 'IS THIS REAL LIFE'):
+            print >> self, 'INVALID PASSKEY'
+            return
+
+        print >> self, 'MCP SHUTDOWN INITIATED'
+        time.sleep(1)
+        print >> self, 'THE MCP WAS SHUTDOWN'
+        print >> self, 'NEW UNPROTECTED FILE FOUND: GARBAGE'
+        self.disc.access = 12
+
+    @expose
+    def pwdgen(self, *key):
+        print >> self, MCP.gen(self, ' '.join(key).upper())
 
 class Rinzler:
     access = 1
@@ -295,10 +352,59 @@ class Zuze:
         for name, price in Zuze.stock_.items():
             print >> self, name, price
 
+class Tron:
+    access = 4
+    alias = ['tron']
+
+    @expose
+    @shift('program', 'from', 'slot')
+    def install(self, what):
+        what = what[0]
+        if what == '0':
+            acl = int(self.disc.extra.get('acl inject', '0'))
+            if acl == 0:
+                print >> self, 'NOTHING IN SLOT 0'
+            elif acl == 1:
+                print >> self, 'PROGRAM ACL INJECT INSTALLED'
+                self.disc.extra['acl inject'] = 2
+                self.disc.commit(self.conn, self)
+            else:
+                print >> self, 'PROGRAM ALREADY INSTALLED'
+        else:
+            print >> self, 'NOTHING IN SLOT', what
+
+    @expose
+    @hidden
+    def inject(self, who, _, *where):
+        acl = int(self.disc.extra.get('acl inject', '0'))
+        if acl != 2:
+            print >> self, 'MISSING INJECT APPLICATION, NEED TO INSTALL FIRST'
+            return
+        src = self.resolve_program(who)
+        dst = self.resolve_program(' '.join(where).lower(), perm=False)
+        if src is None:
+            print >> self, 'NO SUCH PROGRAM:', who
+            return
+        if dst is None:
+            print >> self, 'NO SUCH PROGRAM:', ' '.join(where).upper()
+            return
+        if dst != MCP:
+            print >> self, dst.alias[0].upper(), 'DOES NOT HAVE AN ACCESS CONTROL LIST'
+            return
+        print >> self, src.alias[0].upper(), 'INJECTED INTO MASTER CONTROL PROCESS ACCESS CONTROL LIST'
+
+        if src == Clu:
+            self.disc.access = 10
+            self.disc.commit(self.conn, self)
+            print >> self, 'RUN CODE 429 TO PROCEED'
+            print >> self, '<inject trollolol here>'
+        else:
+            print >> self, "IT'S NOT VERY EFFECTIVE..."
+                
 class Client(threading.Thread):
-    programs = [Clu, Rinzler, MCP, Quorra, Zuze]
+    programs = [Clu, Rinzler, MCP, Quorra, Zuze, Tron]
     files = {
-        'GARBAGE': 'troll',
+        'GARBAGE': 'herp derp the final password, lol',
         'nxgame': '''<insert text here>'''
     }
 
@@ -399,11 +505,96 @@ class Client(threading.Thread):
             if x not in Client.files:
                 print >> self, 'NO SUCH FILE:', x
                 return
-            if x == 'GARBAGE' and self.disc.access < 10:
-                print >> self, 'ACCESS RESTRICTED:', x
-                return
+            #if x == 'GARBAGE' and self.disc.access < 12:
+            #    print >> self, 'ACCESS RESTRICTED:', x
+            #    return
             
             print >> self, Client.files[x]
+
+            if x == 'GARBAGE':
+                time.sleep(5)
+                for x in range(1,10):
+                    time.sleep(0.3)
+                    print >> self, ''
+                time.sleep(1)
+                time.sleep(0.1); print >> self, 'DTBYUK%¤SLCHT;A#M¤XSER'
+                time.sleep(0.1); print >> self, 'SYB/ILNÄUY←[ĸŋn→ĸ¥{øĸŋj→®←þłĸ'
+                time.sleep(0.1); print >> self, '¢÷Ø&→[57kg8i%&&Ł{ŋ↓→€6-lykþ←urøn→ĸ'
+                time.sleep(0.1); print >> self, '¤%GK¢¥drÄKßð5Y&/_V&6eg4'
+                time.sleep(0.1); print >> self, 'D$¥ŋ_Dk4SEVÄ_ktaq23¤ĸ'
+                time.sleep(0.1); print >> self, '³Æĸ¥đW#ð€¤wktvL§¢©'
+                time.sleep(0.1); print >> self, 'SÖVĦ˙J˙;KÖŊŁĦÆM;_LN_B:,_CFPHfgjchfghs.gh. gh.'
+
+                print >> self, ''
+                print >> self, ''
+                print >> self, ''
+                time.sleep(5); print >> self, 'Adding new personality core'
+                time.sleep(5); print >> self, 'New personality core loaded'
+                time.sleep(10)
+
+                print >> self, ''
+                print >> self, ''
+                for x in range(1,4):
+                    self.sock.send('.')
+                    time.sleep(1)
+                time.sleep(4)
+
+                print >> self, ' ARE YOU STILL THERE?'
+
+                while True:
+                    time.sleep(10)
+                    print >> self, ''
+                    print >> self, ''
+                    print >> self, ''
+                    lyrics = [
+                        "This was a triumph",
+                        "I'm making a note here",
+                        "HUGE SUCCESS",
+                        "It's hard to overstate my satisfaction",
+                        "Aperture Science",
+                        " ",
+                        "we do what we must because we can",
+                        "for the good of all of us except for the ones who are dead",
+                        "but there's no sense crying over every mistake",
+                        "you just keep on trying until you run out of cake",
+                        "and the science gets done and you make a neat gun",
+                        "for the people who are still alive",
+                        " ",
+                        "I'm not even angry",
+                        "I'm being so sincere right now",
+                        "even though you broke my heart and killed me",
+                        "and torn into pieces",
+                        "and threw every piece into a fire",
+                        "as they burned it hurt because I was so happy for you!",
+                        "Now these points of data make a wonderful line",
+                        "and we're out of beta, we're releasing on time",
+                        "so I'm glad I got burned",
+                        "Think of all the things we learned for the people that are still alive",
+                        " ",
+                        "go ahead and leave me",
+                        "I think I prefer to stay inside",
+                        "maybe you'll find someone else to help you",
+                        "maybe black mesa",
+                        "that was a joke, haha, fat chance",
+                        "anyway this cake is great, it's so delicious and moist",
+                        "look at me still talking, when there's science to do",
+                        "when I look out there it makes me glad I'm not you",
+                        "I've experiments to run, there is research to be done",
+                        "on the people who are still alive",
+                        " ",
+                        "and believe me I am still alive",
+                        "I'm doing science and I'm still alive",
+                        "I feel FANTASTIC and I'm still alive",
+                        "While you are dying I'll be still alive",
+                        "and when you're dead I'll be still alive",
+                        "STILL ALIVE, still alive"
+                        ]
+                    for x in lyrics:
+                        time.sleep(2)
+                        for y in x:
+                            self.sock.send(y)
+                            time.sleep(0.1)
+                        self.sock.send("\r\n")
 
     @expose
     def logout(self):
@@ -415,7 +606,7 @@ class Client(threading.Thread):
         """Show disc information"""
         print >> self, repr(self.disc)
 
-    def resolve_program(self, name):
+    def resolve_program(self, name, perm=True):
         for x in Client.programs:
             for y in x.alias:
                 if y != name:
@@ -424,7 +615,7 @@ class Client(threading.Thread):
                 if x.alias[0] in self.blacklist:
                     return None
 
-                if x.access > self.disc.access:
+                if perm is True and x.access > self.disc.access:
                     return False
 
                 return x
