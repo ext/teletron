@@ -119,7 +119,7 @@ class Client(threading.Thread):
         self.buf += data
         if data == "\n":
             print '[%s] >>> %s' % (self.addr, self.buf),
-            self.sock.send(self.buf)
+            self.sock.send(self.buf + "\r")
             self.buf = ""
             return
 
@@ -248,19 +248,29 @@ class Client(threading.Thread):
         print >> self, 'WELCOME TO THE NX GRID'
         print >> self, 'INSERT DISC'
 
-        hack = True
+        need_prompt = True
         while self.alive:
             try:
-                if hack:
+                if need_prompt:
                     sock.send('> ')
-                    hack = False
+                    need_prompt = False
 
                 rd, rw, rx = select([sock], [], [], 1.0)
                 if len(rd) == 0:
                     continue
 
-                hack = True
-                line = sock.recv(4096).strip()
+                need_prompt = True
+                line = sock.recv(4096)
+                
+                if line in [chr(3), chr(4), chr(255) + chr(244) + chr(255) + chr(253) + chr(6)]:
+                    print >> sys.stderr, '[%s] client disconnected' % str(self.addr)
+                    self.stop()
+                    continue
+
+                for x in line:
+                    print ord(x)
+
+                line = line.strip()
                 print '[%s] <<< %s' % (self.addr, line)
                 line = line.split(' ')
 
