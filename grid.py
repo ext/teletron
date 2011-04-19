@@ -6,6 +6,7 @@ import traceback
 import time
 import threading
 import sys
+import sqlite3
 from select import select
 from disc import Disc
 
@@ -74,21 +75,32 @@ class Client(threading.Thread):
 
     @expose
     def login(self, identity):
-        self.disc = Disc(identity)
-        print >> self, 'WELCOME', self.disc.username
+        try:
+            self.disc = Disc(self.conn, identity)
+            print >> self, 'WELCOME', self.disc.username
+        except ValueError, e:
+            print '[%s] --- %s' % (self.addr, str(e))
+            print >> self, 'CORRUPT DISC'
 
     @expose
     def whoami(self):
-        """asdf"""
+        """Show disc information"""
         print >> self, repr(self.disc)
 
     @expose
     def _generate_identity_(self, uid, username):
-        id = Disc(data={'uid': uid, 'u': username})
-        print >> self, str(id)
+        disc = Disc(self.conn, values={'uid': uid, 'u': username})
+        row = self.conn.execute('SELECT MAX(instance) FROM disc WHERE user_id=?', (disc.uid,)).fetchone()
+        if row[0] is not None:
+            disc.instance = row[0]+1
+        else:
+            disc.instance = 0
+        disc.commit(self.conn)
+        print >> self, str(disc)
 
     def run(self):
         sock = self.sock # shortcut
+        self.conn = sqlite3.connect('disc.db')
 
         print >> sys.stderr, '[%s] new client connected' % str(self.addr)
         print >> self, 'WELCOME TO THE NX GRID'
@@ -127,6 +139,18 @@ class Client(threading.Thread):
             sock.close()
         except:
             traceback.print_exc()
+
+conn = sqlite3.connect('disc.db')
+conn.execute('''
+CREATE TABLE IF NOT EXISTS
+       disc (
+       	    id int primary key,	
+	    user_id int,
+	    instance int,
+	    corrupt int,
+	    checksum text,
+	    UNIQUE(user_id, instance))
+''')
 
 run = True
 while run:
