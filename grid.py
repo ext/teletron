@@ -147,6 +147,26 @@ class Quorra:
     access = 2
     alias = ['quorra', 'q']
 
+    @expose
+    def introduce(self, who):
+        who = who.lower()
+        if who == 'castor':
+            print >> self, 'THIS IS NOT HIS REAL NAME'
+            return
+
+        if who == 'zuze':
+            print >> self, 'YOU HAVE BEEN INTRODUCED TO ZUZE'
+            print >> self, 'YOU CAN FIND ZUZE AT THE END OF LINE BAR'
+            print >> self, 'RUN CODE 149 TO PROCEED'
+            print >> self, 'FIND DOCUMENTATION AT <insert rajula here>'
+            return
+        
+        print >> self, 'I DO NOT KNOW WHO THAT IS'
+
+class Zuze:
+    access = 3
+    alias = ['zuze', 'z']
+
 class Client(threading.Thread):
     programs = [Clu, Rinzler, MCP, Quorra]
     files = {
