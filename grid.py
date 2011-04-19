@@ -42,7 +42,7 @@ def shift(*text):
 class Clu:
     access = 0
     alias = ['clu']
-    location = ['vault', 'end of line bar', 'grid']
+    location = ['vault', 'end of line bar', 'grid', 'west house']
 
     @expose
     def code(self, num, *args):
@@ -144,7 +144,7 @@ Usage: CODE <NUMBER> [ARGS..]"""
     @staticmethod
     @shift('move', 'to')
     def code_149(self, args):
-        name = ' '.join(args)
+        name = ' '.join(args).lower()
         if name in Clu.location:
             print >> self, 'USER MOVED TO', name.upper()
             self.disc.extra['loc'] = name
