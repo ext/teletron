@@ -47,7 +47,6 @@ class Disc:
             if not row:
                 raise ValueError, 'disc is not known in database'
 
-            print row
             if row[0] == 1:
                 raise ValueError, 'disc is marked as corrupt in database'
 

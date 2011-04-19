@@ -26,7 +26,7 @@ def access(func, level):
 
 class Clu:
     access = 0
-    alias = ['clu', 'test']
+    alias = ['clu']
 
     @expose
     def code(self, num, *args):
@@ -64,10 +64,17 @@ class Client(threading.Thread):
         return [(name,func.__doc__) for name,func in Client.__dict__.items() if getattr(func, '_exposed_', False) and func.__doc__].__iter__()
 
     def __getitem__(self, key):
-        func = Client.__dict__.get(key, None)
-        if func is None or getattr(func, '_exposed_') == None:
-            return None
-        return func
+        src = [Client.__dict__]
+        if self.program:
+            src.append(self.program.__dict__)
+
+        for x in src:
+            func = x.get(key.lower(), None)
+            if func is None:
+                continue
+            if getattr(func, '_exposed_') == None:
+                continue
+            return func
 
     @expose
     def help(self, command=None):
@@ -121,9 +128,8 @@ class Client(threading.Thread):
                     print >> self, 'ACCESS DENIED'
                     return
                 
-                print >> self, 'ACCESS GRANTED. %s PROGRAM ACTIVATED' % y.upper()
+                print >> self, 'ACCESS GRANTED. %s PROGRAM ACTIVATED' % x.alias[0].upper()
                 self.program = x
-                print >> self
                 return
         else:
             print >> self, 'UNKNOWN PROGRAM'
@@ -160,12 +166,12 @@ class Client(threading.Thread):
                 cmd = line[0].lower()
                 args = line[1:]
 
-                if self.disc == None and cmd != 'login':
+                if self.disc == None and cmd not in ['login', '_generate_identity_']:
                     print >> self, 'INSERT DISC'
                     continue
 
-                func = Client.__dict__.get(cmd, None)
-                if func is None or getattr(func, '_exposed_') == None:
+                func = self[cmd]
+                if func is None:
                     print >> self, 'UNKNOWN COMMAND'
                     continue
 
@@ -173,7 +179,6 @@ class Client(threading.Thread):
                     func(self, *args)
                 except TypeError:
                     print >> self, 'MALFORMED COMMAND'
-                    traceback.print_exc()
                     continue
             except socket.error:
                 raise
