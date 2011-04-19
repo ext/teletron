@@ -180,6 +180,9 @@ class Client(threading.Thread):
 
     @expose
     def request(self, *args):
+		"""INITIATES A REQUEST
+ACCESS: REQUESTS ACCESS TO A PROGRAM.
+   USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
         if len(args) < 3:
             raise TypeError
         if args[0].lower() != 'access' or args[1].lower() != 'to':
