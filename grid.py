@@ -13,7 +13,7 @@ from disc import Disc
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-s.bind(('', 1337))
+s.bind(('', 4711))
 s.listen(1)
 
 def expose(func):
