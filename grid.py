@@ -23,17 +23,76 @@ def access(func, level):
     func._access_ = level
     return func
 
-
 class Clu:
     access = 0
     alias = ['clu']
 
     @expose
     def code(self, num, *args):
+        """Modify memory on your disc
+Usage: CODE <NUMBER> [ARGS..]"""
         print 'code', num, args
 
+        try:
+            num = int(num)
+        except ValueError:
+            print >> self, 'INVALID LOCATION'
+            return
+
+        # troll kommandon
+        if num == 42:
+            print >> self, 'GOT ANSWER TO THE ULTIMATE QUESTION OF LIFE, THE UNIVERSE, AND EVERYTHING. QUESTION FORGOTTEN.'
+            return
+
+        if num == 1337:
+            print >> self, 'ARE YOU A WIZARD?'
+            return
+
+        # riktiga
+        if num == 6:
+            if len(args) != 4:
+                print >> self, 'NO LOCATION SPECIFIED'
+                return
+
+            if args[0].lower() != 'password':
+                print >> self, 'MALFORMED COMMAND'
+                print 'pwd'
+                return
+
+            if args[1].lower() != 'to':
+                print >> self, 'MALFORMED COMMAND'
+                print 'to'
+                return
+
+            if args[2].lower() != 'memory':
+                print >> self, 'MALFORMED COMMAND'
+                print 'mem'
+                return
+
+            try:
+                loc = args[3]
+                print 'loc', loc
+                if loc == '0222':
+                    self.disc.access = 1
+                    self.disc.commit(self.conn, self)
+                    return
+                elif int(loc) % 5 == 0 or int(loc) % 13 == 0 or int(loc) % 42 == 0:
+                    self.disc.corrupt = 1
+                    self.disc.commit(self.conn, self)
+                    return
+                else:
+                    print >> self, 'INVALID LOCATION'
+                    return
+            except:
+                traceback.print_exc()
+                print >> self, 'MALFORMED COMMAND'
+
+class Rinzler:
+    access = 1
+    alias = ['rinzler', 'r']
+
 class Client(threading.Thread):
-    programs = [Clu]
+    programs = [Clu, Rinzler]
 
     def __init__(self, sock, addr):
         threading.Thread.__init__(self)
@@ -61,7 +120,10 @@ class Client(threading.Thread):
             return
 
     def __iter__(self):
-        return [(name,func.__doc__) for name,func in Client.__dict__.items() if getattr(func, '_exposed_', False) and func.__doc__].__iter__()
+        cmd = [(name,func.__doc__) for name,func in Client.__dict__.items() if getattr(func, '_exposed_', False) and func.__doc__]
+        if self.program:
+            cmd += [(name,func.__doc__) for name,func in self.program.__dict__.items() if getattr(func, '_exposed_', False) and func.__doc__]
+        return cmd.__iter__()
 
     def __getitem__(self, key):
         src = [Client.__dict__]
@@ -94,12 +156,18 @@ class Client(threading.Thread):
 
     @expose
     def login(self, identity):
+        """Identifies yourself"""
         try:
             self.disc = Disc(self.conn, identity)
             print >> self, 'WELCOME', self.disc.username
         except ValueError, e:
             print '[%s] --- %s' % (self.addr, str(e))
             print >> self, 'CORRUPT DISC'
+
+    @expose
+    def logout(self):
+        """Logout from the grid"""
+        self.stop()
 
     @expose
     def whoami(self):
@@ -120,7 +188,6 @@ class Client(threading.Thread):
         program = ' '.join(args[2:]).lower()
         for x in Client.programs:
             for y in x.alias:
-                print y, program
                 if y != program:
                     continue
 
@@ -136,14 +203,17 @@ class Client(threading.Thread):
         
     @expose
     def _generate_identity_(self, uid, username):
-        disc = Disc(self.conn, values={'uid': uid, 'u': username})
-        row = self.conn.execute('SELECT MAX(instance) FROM disc WHERE user_id=?', (disc.uid,)).fetchone()
-        if row[0] is not None:
-            disc.instance = row[0]+1
-        else:
-            disc.instance = 0
-        disc.commit(self.conn)
-        print >> self, str(disc)
+        try:
+            disc = Disc(self.conn, values={'uid': uid, 'u': username})
+            row = self.conn.execute('SELECT MAX(instance) FROM disc WHERE user_id=?', (disc.uid,)).fetchone()
+            if row[0] is not None:
+                disc.instance = row[0]+1
+            else:
+                disc.instance = 0
+            disc.commit(self.conn, self)
+        except:
+            traceback.print_exc()
+            raise
 
     def run(self):
         sock = self.sock # shortcut

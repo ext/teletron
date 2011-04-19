@@ -50,7 +50,7 @@ class Disc:
             if row[0] == 1:
                 raise ValueError, 'disc is marked as corrupt in database'
 
-    def commit(self, conn):
+    def commit(self, conn, dst):
         conn.execute('UPDATE disc SET corrupt=1 WHERE user_id=?', (self.uid,))
         conn.execute('''
 		INSERT OR REPLACE INTO
@@ -59,6 +59,12 @@ class Disc:
 		(:uid, :instance, :corrupt)
 	''', dict(uid=self.uid, instance=self.instance, corrupt=self.corrupt))
         conn.commit()
+
+        if self.corrupt == 1:
+            print >> dst, 'DISC CORRUPT'
+        else:
+            print >> dst, 'YOUR DISC HAS BEEN UPDATED'
+            print >> dst, 'NEW DISC:', str(self)
 
     def __str__(self):
         d = {
