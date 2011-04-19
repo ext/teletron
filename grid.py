@@ -73,8 +73,11 @@ Usage: CODE <NUMBER> [ARGS..]"""
                 loc = args[3]
                 print 'loc', loc
                 if loc == '0222':
+                    tmp = self.disc.access
                     self.disc.access = 1
                     self.disc.commit(self.conn, self)
+                    if tmp == 0:
+                        print >> self, 'PASSWORD: tonfiskchili19'
                     return
                 elif int(loc) % 5 == 0 or int(loc) % 13 == 0 or int(loc) % 42 == 0:
                     self.disc.corrupt = 1
