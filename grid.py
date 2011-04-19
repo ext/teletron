@@ -181,6 +181,22 @@ class Quorra:
 	if who == 'bartik':
 	    print >> self, 'PROGRAMS ARE DISSAPREARING!'
 	    print >> self, 'GRANT ME AN AUDIENCE'
+	    return
+
+	if who == 'bit':
+	    print >> self, 'NO-NO-NO-NO-NO'
+	    return
+
+	if who == 'crom':
+	    print >> self,'NO, YOU ARE NOT EVEN CLOSE'
+	    return
+	
+	if who == 'dumont':
+	    print >> self, 'THIS TIME I DO NOT KNOW'
+	    return
+
+	if who == 'sark':
+	    print >> self, 'NO, NOT CORRECT IN ANY WAY'
 
         print >> self, 'I DO NOT KNOW WHO THAT IS'
 
