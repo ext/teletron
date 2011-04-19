@@ -34,7 +34,7 @@ def shift(*text):
         def inner(self, *args):
             for x,y in zip(args, text):
                 if x!=y:
-                    raise ValueError, 'got %s, expected %s' % (x,y)
+                    raise TypeError, 'got %s, expected %s' % (x,y)
             return func(self, args[n:])
         return inner
     return wrapper
@@ -237,7 +237,7 @@ class Rinzler:
         if len(args) < 3 or \
                 args[0].lower() != 'attack' or \
                 args[1].lower() != 'on':
-            raise ValueError
+            raise TypeError
 
         target = ' '.join(args[2:]).lower()
         program = self.resolve_program(target)
@@ -261,7 +261,7 @@ class Quorra:
     @expose
     @shift('to')
     def introduce(self, who):
-        who = who.lower()
+        who = ' '.join(who).lower()
         if who == 'castor':
             print >> self, 'THIS IS NOT HIS REAL NAME'
             return
@@ -320,7 +320,7 @@ class Zuse:
     stock_ = {
         'acl inject': 10000,
         'wirts leg': 14000,
-        'bablefish': 8000,
+        'babelfish': 8000,
     }
 
     @expose
