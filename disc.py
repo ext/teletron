@@ -82,10 +82,9 @@ class Disc:
         txt = ';'.join(l)
         chksum = binascii.crc32(txt) & 0xffffffff
         txt = '%s:%010x' % (txt, chksum)
-        print txt
         key = srepeat(Disc.secret, len(txt))
         return ''.join(['%02x' % (ord(x) ^ ord(y)) for x,y in zip(txt, key)])
 
     def __repr__(self):
-        return 'uid=%d, username=%s, access=%d, instance=%d' \
-            % (self.uid, self.username, self.access, self.instance)
+        return 'uid=%d, username=%s, access=%d, instance=%d, location=%s' \
+            % (self.uid, self.username, self.access, self.instance, self.extra.get('loc', 'grid'))

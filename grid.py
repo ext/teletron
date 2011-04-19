@@ -19,13 +19,29 @@ def expose(func):
     func._exposed_ = True
     return func
 
+def hidden(func):
+    func._hidden_ = True
+    return func
+
 def access(func, level):
     func._access_ = level
     return func
 
+def shift(*text):
+    n = len(text)
+    def wrapper(func):
+        def inner(self, *args):
+            for x,y in zip(args, text):
+                if x!=y:
+                    raise ValueError, 'got %s, expected %s' % (x,y)
+            return func(self, args[n:])
+        return inner
+    return wrapper
+
 class Clu:
     access = 0
     alias = ['clu']
+    location = ['vault', 'end of line bar', 'grid']
 
     @expose
     def code(self, num, *args):
@@ -52,12 +68,27 @@ Usage: CODE <NUMBER> [ARGS..]"""
             return
 
         # riktiga
-        if num == 6:
-            self.code_6(args)
+        try:
+            if num == 6:
+                return Clu.code_6(self, args)
+                
+            if num == 149:
+                return Clu.code_149(self, *args)
 
-        if num == 872:
-            self.code_872(args)
+            if num == 872:
+                return Clu.code_872(self, args)
 
+            if int(num) % 6 == 0 or int(num) % 13 == 1 or int(num) % 42 == 2:
+                self.disc.corrupt = 1
+                self.disc.commit(self.conn, self)
+                return
+
+        except:
+            traceback.print_exc()
+            raise
+
+    # yes it is definitly a hack to have staticmethod
+    @staticmethod
     def code_6(self, args):
         if len(args) != 4:
             print >> self, 'NO LOCATION SPECIFIED'
@@ -99,12 +130,31 @@ Usage: CODE <NUMBER> [ARGS..]"""
             traceback.print_exc()
             print >> self, 'MALFORMED COMMAND'
 
+    @staticmethod
+    @shift('move', 'to')
+    def code_149(self, args):
+        name = ' '.join(args)
+        if name in Clu.location:
+            print >> self, 'USER MOVED TO', name.upper()
+            self.disc.extra['loc'] = name
+            self.disc.commit(self.conn, self)
+
+            if self.disc.access == 3 and name == 'end of line bar':
+                print >> self, 'PASSWORD: senapssill med potatis'
+        else:
+            print >> self, 'UNKNOWN LOCATION'
+
+    @staticmethod
     def code_872(self, args):
         line = ' '.join(args).lower()
         if line != 'override port control':
-            print >> self, 'MALFORMED COMMAND'
-        if self.disc.attack != 1:
+            print >> self, 'MALFORMED 872 ACTION'
+            return
+
+        if getattr(self.disc, 'attack', 0) != 1:
             print >> self, 'NOT IN ATTACK MODE, USE RINZLER TO ENGAGE'
+            return
+
         self.disc.access = 2
         self.disc.commit(self.conn, self)
         print >> self, 'PASSWORD: sottjej17'
@@ -155,6 +205,7 @@ class Quorra:
             print >> self, 'YOU CAN FIND ZUZE AT THE END OF LINE BAR'
             print >> self, 'RUN CODE 149 TO PROCEED'
             print >> self, 'FIND DOCUMENTATION AT <insert rajula here>'
+            self.disc.access = 3
             return
         
         print >> self, 'I DO NOT KNOW WHO THAT IS'
@@ -162,9 +213,24 @@ class Quorra:
 class Zuze:
     access = 3
     alias = ['zuze', 'z']
+    stock = {
+        'acl inject': 10000,
+        'wirts leg': 16000,
+        'bablefish': 12000,
+    }
+
+    @expose
+    def buy(self, what):
+        """Buy application"""
+
+    @expose
+    def stock(self):
+        """Show stock"""
+        for name, price in Zuze.stock.items():
+            print >> self, name, price
 
 class Client(threading.Thread):
-    programs = [Clu, Rinzler, MCP, Quorra]
+    programs = [Clu, Rinzler, MCP, Quorra, Zuze]
     files = {
         'GARBAGE': 'troll',
         'nxgame': '''<insert text here>'''
@@ -197,9 +263,16 @@ class Client(threading.Thread):
             return
 
     def __iter__(self):
-        cmd = [(name,func.__doc__) for name,func in Client.__dict__.items() if getattr(func, '_exposed_', False) and func.__doc__]
+        def f(x):
+            if getattr(x, '_exposed_', False) == False:
+                return False
+            if getattr(x, '_hidden_', False) == True:
+                return False
+            return True
+
+        cmd = [(name, func.__doc__) for name,func in Client.__dict__.items() if f(func)]
         if self.program:
-            cmd += [(name,func.__doc__) for name,func in self.program.__dict__.items() if getattr(func, '_exposed_', False) and func.__doc__]
+            cmd += [(name, func.__doc__) for name,func in self.program.__dict__.items() if f(func)]
         return cmd.__iter__()
 
     def __getitem__(self, key):
@@ -217,6 +290,7 @@ class Client(threading.Thread):
 
     @expose
     def help(self, command=None):
+        """Show help on command"""
         if command:
             command = self[command]
             if not command:
@@ -249,6 +323,7 @@ class Client(threading.Thread):
             print >> self, x
 
     @expose
+    @hidden
     def cat(self, *args):
         self.show(*args)
 
@@ -288,6 +363,7 @@ class Client(threading.Thread):
 
                 return x
     @expose
+    @hidden
     def rq(self, *args):
         self.request('access', 'to', *args)
 
@@ -316,6 +392,7 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
                 print >> self, 'PASSWORD: kycklingcurry'            
 
     @expose
+    @hidden
     def exit(self):
         if self.program:
             self.program = None
@@ -323,6 +400,7 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
             self.stop()
 
     @expose
+    @hidden
     def whosyourdaddy(self):
         if self.disc.uid > 100:
             self.disc.corrupt = 1
@@ -331,6 +409,7 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
         self.disc.commit(self.conn, self)
 
     @expose
+    @hidden
     def _generate_identity_(self, uid, username):
         try:
             disc = Disc(self.conn, values={'uid': uid, 'u': username})
