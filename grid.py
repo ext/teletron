@@ -90,9 +90,34 @@ Usage: CODE <NUMBER> [ARGS..]"""
                 traceback.print_exc()
                 print >> self, 'MALFORMED COMMAND'
 
+class MCP:
+    access = 10
+    alias = ['master control program', 'master control', 'mcp']
+
 class Rinzler:
     access = 1
     alias = ['rinzler', 'r']
+
+    @expose
+    def initiate(self, *args):
+        if len(args) < 3 or \
+                args[0].lower() != 'attack' or \
+                args[1].lower() != 'on':
+            raise ValueError
+
+        target = ' '.join(args[2:]).lower()
+        program = self.resolve_program(target)
+        
+        if program is None:
+            print >> self, 'UNKNOWN PROGRAM', target
+            return
+
+        print >> self, 'INITIATING ATTACK ON', target.upper()
+        if target not in MCP.alias:
+            print >> self, "IT'S SUPER EFFECTIVE"
+            self.blacklist.append(program.alias[0])
+        else:
+            print >> self, 'RUN CODE 872 TO PROCEED'
 
 class Client(threading.Thread):
     programs = [Clu, Rinzler]
@@ -109,6 +134,7 @@ class Client(threading.Thread):
         self.buf = ''
         self.disc = None
         self.program = None
+        self.blacklist = []
         print >> sys.stderr, 'New client connected'
 
     def kill(self):
@@ -204,6 +230,19 @@ class Client(threading.Thread):
         """Show disc information"""
         print >> self, repr(self.disc)
 
+    def resolve_program(self, name):
+        for x in Client.programs:
+            for y in x.alias:
+                if y != name:
+                    continue
+
+                if x.alias[0] in self.blacklist:
+                    return None
+
+                if x.access > self.disc.access:
+                    return False
+
+                return x
     @expose
     def rq(self, *args):
         self.request('access', 'to', *args)
@@ -218,25 +257,19 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
         if args[0].lower() != 'access' or args[1].lower() != 'to':
             raise TypeError
 
-        program = ' '.join(args[2:]).lower()
-        for x in Client.programs:
-            for y in x.alias:
-                if y != program:
-                    continue
+        name = ' '.join(args[2:]).lower()
+        program = self.resolve_program(name)
 
-                if x.access > self.disc.access:
-                    print >> self, 'ACCESS DENIED'
-                    return
-                
-                print >> self, 'ACCESS GRANTED. %s PROGRAM ACTIVATED' % x.alias[0].upper()
-                self.program = x
-
-                if self.disc.access == 0:
-                    print >> self, 'PASSWORD: kycklingcurry'
-
-                return
-        else:
+        if program is None:
             print >> self, 'UNKNOWN PROGRAM'
+        elif program == False:
+            print >> self, 'ACCESS DENIED'
+        else:
+            print >> self, 'ACCESS GRANTED. %s PROGRAM ACTIVATED' % program.alias[0].upper()
+            self.program = program
+
+            if self.disc.access == 0:
+                print >> self, 'PASSWORD: kycklingcurry'            
 
     @expose
     def whosyourdaddy(self):
@@ -275,7 +308,12 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
                     sock.send('> ')
                     need_prompt = False
 
-                rd, rw, rx = select([sock], [], [], 1.0)
+                rd, rw, rx = select([sock], [], [sock], 1.0)
+
+                if len(rx) == 1:
+                    self.stop()
+                    continue
+
                 if len(rd) == 0:
                     continue
 
