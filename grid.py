@@ -801,6 +801,6 @@ while run:
         traceback.print_exc()
 
 for x in threading.enumerate():
-    if x == threading.current_thread():
+    if x == threading.currentThread():
         continue
     x.kill()
