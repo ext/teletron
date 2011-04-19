@@ -43,7 +43,7 @@ Usage: CODE <NUMBER> [ARGS..]"""
             print >> self, 'GOT ANSWER TO THE ULTIMATE QUESTION OF LIFE, THE UNIVERSE, AND EVERYTHING. QUESTION FORGOTTEN.'
             return
 
-	if num == 666
+	if num == 666:
 	    print >> self, "DO NOT AWAKEN THE EVIL THAT IS INSIDE YOU"
 	    return
 
@@ -197,6 +197,7 @@ class Quorra:
 
 	if who == 'sark':
 	    print >> self, 'NO, NOT CORRECT IN ANY WAY'
+	    return
 
         print >> self, 'I DO NOT KNOW WHO THAT IS'
 
