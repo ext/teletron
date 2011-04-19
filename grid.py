@@ -59,6 +59,10 @@ Usage: CODE <NUMBER> [ARGS..]"""
             print >> self, 'GOT ANSWER TO THE ULTIMATE QUESTION OF LIFE, THE UNIVERSE, AND EVERYTHING. QUESTION FORGOTTEN.'
             return
 
+	if num == 666:
+	    print >> self, "DO NOT AWAKEN THE EVIL THAT IS INSIDE YOU"
+	    return
+
         if num == 1337:
             print >> self, 'ARE YOU A WIZARD?'
             return
@@ -211,7 +215,45 @@ class Quorra:
             print >> self, 'FIND DOCUMENTATION AT <insert rajula here>'
             self.disc.access = 3
             return
-        
+
+        if who == 'gem':
+	    print >> self, 'YOU ARE LOOKING FOR SOMEONE'
+	    print >> self, 'FOLLOW ME' 
+	    return
+
+	if who == 'rinzler':
+	    print >> self, 'I TOOK PART IN FOOLING YOU'
+	    return
+
+	if who == 'clu':
+	    print >> self, 'WHAT ARE YOU, STUPID?'
+	    return
+
+	if who == 'quorra':
+	    print >> self, 'SON, I AM DISSAPOINT'
+	    return
+
+	if who == 'bartik':
+	    print >> self, 'PROGRAMS ARE DISSAPREARING!'
+	    print >> self, 'GRANT ME AN AUDIENCE'
+	    return
+
+	if who == 'bit':
+	    print >> self, 'NO-NO-NO-NO-NO'
+	    return
+
+	if who == 'crom':
+	    print >> self,'NO, YOU ARE NOT EVEN CLOSE'
+	    return
+	
+	if who == 'dumont':
+	    print >> self, 'THIS TIME I DO NOT KNOW'
+	    return
+
+	if who == 'sark':
+	    print >> self, 'NO, NOT CORRECT IN ANY WAY'
+	    return
+
         print >> self, 'I DO NOT KNOW WHO THAT IS'
 
 class Zuze:
