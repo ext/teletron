@@ -779,6 +779,11 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
         except:
             traceback.print_exc()
 
+        try:
+            self.conn.close()
+        except:
+            traceback.print_exc()
+
 conn = sqlite3.connect('disc.db')
 conn.execute('''
 CREATE TABLE IF NOT EXISTS
@@ -805,3 +810,8 @@ for x in threading.enumerate():
     if x == threading.currentThread():
         continue
     x.kill()
+
+try:
+    conn.close()
+except:
+    traceback.print_exc()
