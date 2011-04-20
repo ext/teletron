@@ -699,7 +699,8 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
 
     @expose
     @hidden
-    def _generate_identity_(self, uid, username):
+    def _generate_identity_(self, uid, *username):
+        username = ' '.join(username)
         try:
             disc = Disc(self.conn, values={'uid': uid, 'u': username})
             row = self.conn.execute('SELECT MAX(instance) FROM disc WHERE user_id=?', (disc.uid,)).fetchone()
