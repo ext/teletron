@@ -755,7 +755,7 @@ USAGE: REQUEST ACCESS TO <PROGRAM NAME>"""
                 cmd = line[0].lower()
                 args = line[1:]
 
-                if self.disc == None and cmd not in ['exit', 'login', '_generate_identity_']:
+                if (self.disc == None or self.disc.corrupt == 1) and cmd not in ['exit', 'login', '_generate_identity_']:
                     print >> self, 'INSERT DISC'
                     continue
 
