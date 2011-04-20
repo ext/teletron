@@ -375,6 +375,8 @@ class Tron:
     @expose
     @shift('program', 'from', 'slot')
     def install(self, what):
+        """INSTALLS ADDITIONAL COMMANDS.
+USAGE: INSTALL PROGRAM FROM SLOT <ID>"""
         what = what[0]
         if what == '0':
             acl = int(self.disc.extra.get('acl inject', '0'))
