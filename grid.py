@@ -394,6 +394,8 @@ USAGE: INSTALL PROGRAM FROM SLOT <ID>"""
     @expose
     @hidden
     def inject(self, who, _, *where):
+        """INJECT PROGRAM INTO ANOTHER PROGRAMS ACCESS CONTROL LIST
+USAGE: INJECT <PROGRAM> INTO <PROGRAM>"""
         acl = int(self.disc.extra.get('acl inject', '0'))
         if acl != 2:
             print >> self, 'MISSING INJECT APPLICATION, NEED TO INSTALL FIRST'
