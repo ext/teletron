@@ -10,6 +10,7 @@ import sqlite3
 import md5
 from select import select
 from disc import Disc
+from functools import wraps
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -31,6 +32,7 @@ def access(func, level):
 def shift(*text):
     n = len(text)
     def wrapper(func):
+        @wraps(func)
         def inner(self, *args):
             for x,y in zip(args, text):
                 if x!=y:
